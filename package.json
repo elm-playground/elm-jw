@@ -1,0 +1,25 @@
+{
+  "name": "elm-hello",
+  "version": "1.0.0",
+  "description": "- `elm-package install` - `elm-package install evancz/elm-html`",
+  "main": "elm.js",
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-elm": "^0.2.0",
+    "gulp-rename": "^1.2.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wk-j/elm-hello.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wk-j/elm-hello/issues"
+  },
+  "homepage": "https://github.com/wk-j/elm-hello#readme"
+}
