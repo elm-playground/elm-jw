@@ -6885,71 +6885,62 @@ Elm.Main.make = function (_elm) {
    $Time = Elm.Time.make(_elm),
    $Window = Elm.Window.make(_elm);
    var _op = {};
-   var drawShip = F2(function (gameHeight,ship) {
-      var shipColor = ship.isFiring ? $Color.red : $Color.blue;
-      return A2($Graphics$Collage.alpha,
-      $Basics.toFloat(ship.powerLevel) / 10,
-      A2($Graphics$Collage.move,
-      {ctor: "_Tuple2",_0: $Basics.toFloat(ship.position),_1: 50 - gameHeight / 2},
-      A2($Graphics$Collage.rotate,$Basics.degrees(90),A2($Graphics$Collage.filled,shipColor,A2($Graphics$Collage.ngon,3,30)))));
-   });
-   var drawGame = F2(function (w,h) {    return A2($Graphics$Collage.filled,$Color.gray,A2($Graphics$Collage.rect,w,h));});
-   var view = F2(function (_p0,ship) {
-      var _p1 = _p0;
-      var _p4 = _p1._0;
-      var _p3 = _p1._1;
-      var _p2 = {ctor: "_Tuple2",_0: $Basics.toFloat(_p4),_1: $Basics.toFloat(_p3)};
-      var w$ = _p2._0;
-      var h$ = _p2._1;
-      return A3($Graphics$Collage.collage,_p4,_p3,_U.list([A2(drawGame,w$,h$),A2(drawShip,h$,ship),$Graphics$Collage.toForm($Graphics$Element.show(ship))]));
-   });
-   var update = F2(function (action,ship) {
-      var _p5 = action;
-      switch (_p5.ctor)
-      {case "NoOp": return ship;
-         case "Right": return _U.update(ship,{position: ship.position + 1});
-         case "Left": return _U.update(ship,{position: ship.position - 1});
-         case "Fire": var _p6 = _p5._0;
-           var newPowerLevel = _p6 ? ship.powerLevel - 1 : ship.powerLevel;
-           return _U.update(ship,{isFiring: _p6,powerLevel: newPowerLevel});
-         default: var newPowerLevel = _U.cmp(ship.powerLevel,10) < 0 ? ship.powerLevel + 1 : ship.powerLevel;
-           return _U.update(ship,{powerLevel: newPowerLevel});}
-   });
-   var Tick = {ctor: "Tick"};
-   var ticker = A2($Signal.map,$Basics.always(Tick),$Time.every($Time.second));
-   var Fire = function (a) {    return {ctor: "Fire",_0: a};};
-   var fire = A2($Signal.map,Fire,$Keyboard.space);
-   var Right = {ctor: "Right"};
-   var Left = {ctor: "Left"};
-   var NoOp = {ctor: "NoOp"};
-   var direction = function () {
-      var toAction = function (n) {    var _p7 = n;switch (_p7) {case -1: return Left;case 0: return NoOp;case 1: return Right;default: return NoOp;}};
-      var delta = $Time.fps(500);
-      var x = A2($Signal.map,function (_) {    return _.x;},$Keyboard.arrows);
-      var actions = A2($Signal.map,toAction,x);
-      return A2($Signal.sampleOn,delta,actions);
+   var input = function () {
+      var delta = A2($Signal.map,function (t) {    return t / 20;},$Time.fps(30));
+      return A2($Signal.sampleOn,delta,A3($Signal.map2,F2(function (v0,v1) {    return {ctor: "_Tuple2",_0: v0,_1: v1};}),delta,$Keyboard.arrows));
    }();
-   var input = $Signal.mergeMany(_U.list([direction,fire,ticker]));
-   var initialShip = {position: 0,powerLevel: 10,isFiring: false};
-   var model = A3($Signal.foldp,update,initialShip,input);
-   var main = A3($Signal.map2,view,$Window.dimensions,model);
-   var Model = F3(function (a,b,c) {    return {position: a,powerLevel: b,isFiring: c};});
+   var view = F2(function (_p0,mario) {
+      var _p1 = _p0;
+      var _p5 = _p1._0;
+      var _p4 = _p1._1;
+      var dir = function () {    var _p2 = mario.dir;if (_p2.ctor === "Left") {    return "left";} else {    return "right";}}();
+      var verb = _U.cmp(mario.y,0) > 0 ? "jump" : !_U.eq(mario.vx,0) ? "walk" : "stand";
+      var src = A2($Basics._op["++"],"../imgs/mario/",A2($Basics._op["++"],verb,A2($Basics._op["++"],"/",A2($Basics._op["++"],dir,".gif"))));
+      var marioImage = A3($Graphics$Element.image,35,35,src);
+      var _p3 = {ctor: "_Tuple2",_0: $Basics.toFloat(_p5),_1: $Basics.toFloat(_p4)};
+      var w = _p3._0;
+      var h = _p3._1;
+      var groundY = 62 - h / 2;
+      var position = {ctor: "_Tuple2",_0: mario.x,_1: mario.y + groundY};
+      return A3($Graphics$Collage.collage,
+      _p5,
+      _p4,
+      _U.list([A2($Graphics$Collage.filled,A3($Color.rgb,174,238,238),A2($Graphics$Collage.rect,w,h))
+              ,A2($Graphics$Collage.move,
+              {ctor: "_Tuple2",_0: 0,_1: 24 - h / 2},
+              A2($Graphics$Collage.filled,A3($Color.rgb,74,167,43),A2($Graphics$Collage.rect,w,50)))
+              ,A2($Graphics$Collage.move,position,$Graphics$Collage.toForm(marioImage))]));
+   });
+   var physics = F2(function (dt,mario) {    return _U.update(mario,{x: mario.x + dt * mario.vx,y: A2($Basics.max,0,mario.y + dt * mario.vy)});});
+   var gravity = F2(function (dt,mario) {    return _U.update(mario,{vy: _U.cmp(mario.y,0) > 0 ? mario.vy - dt / 4 : 0});});
+   var jump = F2(function (keys,mario) {    return _U.cmp(keys.y,0) > 0 && _U.eq(mario.vy,0) ? _U.update(mario,{vy: 6.0}) : mario;});
+   var Keys = F2(function (a,b) {    return {x: a,y: b};});
+   var Right = {ctor: "Right"};
+   var mario = {x: 0,y: 0,vx: 0,vy: 0,dir: Right};
+   var Left = {ctor: "Left"};
+   var walk = F2(function (keys,mario) {
+      return _U.update(mario,{vx: $Basics.toFloat(keys.x),dir: _U.cmp(keys.x,0) < 0 ? Left : _U.cmp(keys.x,0) > 0 ? Right : mario.dir});
+   });
+   var update = F2(function (_p6,mario) {
+      var _p7 = _p6;
+      var _p9 = _p7._1;
+      var _p8 = _p7._0;
+      return A2(physics,_p8,A2(walk,_p9,A2(jump,_p9,A2(gravity,_p8,mario))));
+   });
+   var main = A3($Signal.map2,view,$Window.dimensions,A3($Signal.foldp,update,mario,input));
+   var Model = F5(function (a,b,c,d,e) {    return {x: a,y: b,vx: c,vy: d,dir: e};});
    return _elm.Main.values = {_op: _op
                              ,Model: Model
-                             ,initialShip: initialShip
-                             ,NoOp: NoOp
                              ,Left: Left
                              ,Right: Right
-                             ,Fire: Fire
-                             ,Tick: Tick
+                             ,Keys: Keys
+                             ,mario: mario
                              ,update: update
+                             ,jump: jump
+                             ,gravity: gravity
+                             ,physics: physics
+                             ,walk: walk
                              ,view: view
-                             ,drawGame: drawGame
-                             ,drawShip: drawShip
-                             ,fire: fire
-                             ,ticker: ticker
-                             ,input: input
-                             ,direction: direction
-                             ,model: model
-                             ,main: main};
+                             ,main: main
+                             ,input: input};
 };
