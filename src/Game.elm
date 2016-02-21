@@ -6,6 +6,7 @@ import Color exposing (..)
 import Keyboard
 import Window
 import Time
+import Debug
 
 
 --MODEL
@@ -70,8 +71,6 @@ update action ship =
       in
         { ship | powerLevel = newPowerLevel }
 
-
-
 -- VIEW
 
 
@@ -85,7 +84,7 @@ view ( w, h ) ship =
       w
       h
       [ drawGame w' h'
-      , drawShip h' ship
+      , drawShip h' (ship)
       , toForm (show ship)
       ]
 
@@ -106,11 +105,10 @@ drawShip gameHeight ship =
         blue
   in
     ngon 3 30
-      |> filled shipColor
+      |> filled (shipColor |> Debug.watch "color")
       |> rotate (degrees 90)
       |> move ( (toFloat ship.position), (50 - gameHeight / 2) )
       |> alpha ((toFloat ship.powerLevel) / 10)
-
 
 
 -- SIGNALS
@@ -138,7 +136,7 @@ direction =
       Signal.map .x Keyboard.arrows
 
     delta =
-      Time.fps 500
+      Time.fps 3
 
     toAction n =
       case n of

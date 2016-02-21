@@ -10,7 +10,6 @@ import Window
 
 -- MODEL
 
-
 type alias Model =
   { x : Float
   , y : Float
