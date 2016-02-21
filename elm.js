@@ -6877,10 +6877,13 @@ Elm.Main.make = function (_elm) {
    $Debug = Elm.Debug.make(_elm),
    $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Keyboard = Elm.Keyboard.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
+   $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm),
+   $Window = Elm.Window.make(_elm);
    var _op = {};
    var drawShip = F2(function (gameHeight,ship) {
       var shipColor = ship.isFiring ? $Color.red : $Color.blue;
@@ -6891,17 +6894,62 @@ Elm.Main.make = function (_elm) {
       A2($Graphics$Collage.rotate,$Basics.degrees(90),A2($Graphics$Collage.filled,shipColor,A2($Graphics$Collage.ngon,3,30)))));
    });
    var drawGame = F2(function (w,h) {    return A2($Graphics$Collage.filled,$Color.gray,A2($Graphics$Collage.rect,w,h));});
-   var view = function (ship) {
-      var _p0 = {ctor: "_Tuple2",_0: 400,_1: 400};
-      var w = _p0._0;
-      var h = _p0._1;
-      var _p1 = {ctor: "_Tuple2",_0: $Basics.toFloat(w),_1: $Basics.toFloat(h)};
-      var w$ = _p1._0;
-      var h$ = _p1._1;
-      return A3($Graphics$Collage.collage,w,h,_U.list([A2(drawGame,w$,h$),A2(drawShip,h$,ship),$Graphics$Collage.toForm($Graphics$Element.show(ship))]));
-   };
+   var view = F2(function (_p0,ship) {
+      var _p1 = _p0;
+      var _p4 = _p1._0;
+      var _p3 = _p1._1;
+      var _p2 = {ctor: "_Tuple2",_0: $Basics.toFloat(_p4),_1: $Basics.toFloat(_p3)};
+      var w$ = _p2._0;
+      var h$ = _p2._1;
+      return A3($Graphics$Collage.collage,_p4,_p3,_U.list([A2(drawGame,w$,h$),A2(drawShip,h$,ship),$Graphics$Collage.toForm($Graphics$Element.show(ship))]));
+   });
+   var update = F2(function (action,ship) {
+      var _p5 = action;
+      switch (_p5.ctor)
+      {case "NoOp": return ship;
+         case "Right": return _U.update(ship,{position: ship.position + 1});
+         case "Left": return _U.update(ship,{position: ship.position - 1});
+         case "Fire": var _p6 = _p5._0;
+           var newPowerLevel = _p6 ? ship.powerLevel - 1 : ship.powerLevel;
+           return _U.update(ship,{isFiring: _p6,powerLevel: newPowerLevel});
+         default: var newPowerLevel = _U.cmp(ship.powerLevel,10) < 0 ? ship.powerLevel + 1 : ship.powerLevel;
+           return _U.update(ship,{powerLevel: newPowerLevel});}
+   });
+   var Tick = {ctor: "Tick"};
+   var ticker = A2($Signal.map,$Basics.always(Tick),$Time.every($Time.second));
+   var Fire = function (a) {    return {ctor: "Fire",_0: a};};
+   var fire = A2($Signal.map,Fire,$Keyboard.space);
+   var Right = {ctor: "Right"};
+   var Left = {ctor: "Left"};
+   var NoOp = {ctor: "NoOp"};
+   var direction = function () {
+      var toAction = function (n) {    var _p7 = n;switch (_p7) {case -1: return Left;case 0: return NoOp;case 1: return Right;default: return NoOp;}};
+      var delta = $Time.fps(500);
+      var x = A2($Signal.map,function (_) {    return _.x;},$Keyboard.arrows);
+      var actions = A2($Signal.map,toAction,x);
+      return A2($Signal.sampleOn,delta,actions);
+   }();
+   var input = $Signal.mergeMany(_U.list([direction,fire,ticker]));
    var initialShip = {position: 0,powerLevel: 10,isFiring: false};
-   var main = view(initialShip);
+   var model = A3($Signal.foldp,update,initialShip,input);
+   var main = A3($Signal.map2,view,$Window.dimensions,model);
    var Model = F3(function (a,b,c) {    return {position: a,powerLevel: b,isFiring: c};});
-   return _elm.Main.values = {_op: _op,Model: Model,initialShip: initialShip,view: view,drawGame: drawGame,drawShip: drawShip,main: main};
+   return _elm.Main.values = {_op: _op
+                             ,Model: Model
+                             ,initialShip: initialShip
+                             ,NoOp: NoOp
+                             ,Left: Left
+                             ,Right: Right
+                             ,Fire: Fire
+                             ,Tick: Tick
+                             ,update: update
+                             ,view: view
+                             ,drawGame: drawGame
+                             ,drawShip: drawShip
+                             ,fire: fire
+                             ,ticker: ticker
+                             ,input: input
+                             ,direction: direction
+                             ,model: model
+                             ,main: main};
 };
