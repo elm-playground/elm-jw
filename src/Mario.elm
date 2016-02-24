@@ -10,6 +10,7 @@ import Window
 
 -- MODEL
 
+
 type alias Model =
   { x : Float
   , y : Float
@@ -54,7 +55,7 @@ update ( dt, keys ) mario =
 jump : Keys -> Model -> Model
 jump keys mario =
   if keys.y > 0 && mario.vy == 0 then
-    { mario | vy = 6.0 }
+    { mario | vy = 20.0 }
   else
     mario
 
@@ -64,7 +65,7 @@ gravity dt mario =
   { mario
     | vy =
         if mario.y > 0 then
-          mario.vy - dt / 4
+          mario.vy - dt / 2
         else
           0
   }
@@ -119,13 +120,20 @@ view ( w', h' ) mario =
           "right"
 
     src =
-      "../imgs/mario/" ++ verb ++ "/" ++ dir ++ ".gif"
+      "../imgs/mario/"
+        ++ verb
+        ++ "/"
+        ++ dir
+        ++ if verb == "jump" then
+            ".png"
+           else
+            ".png"
 
     marioImage =
-      image 35 35 src
+      image 130 130 src
 
     groundY =
-      62 - h / 2
+      110 - h / 2
 
     position =
       ( mario.x, mario.y + groundY )
@@ -157,6 +165,6 @@ input : Signal ( Float, Keys )
 input =
   let
     delta =
-      Signal.map (\t -> t / 20) (fps 30)
+      Signal.map (\t -> t / 20) (fps 100)
   in
     Signal.sampleOn delta (Signal.map2 (,) delta Keyboard.arrows)
