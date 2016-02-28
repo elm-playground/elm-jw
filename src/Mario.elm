@@ -11,6 +11,7 @@ import Window
 -- MODEL
 
 
+{-| -}
 type alias Model =
   { x : Float
   , y : Float
@@ -93,10 +94,7 @@ walk keys mario =
   }
 
 
-
--- VIEW
-
-
+{-| -}
 view : ( Int, Int ) -> Model -> Element
 view ( w', h' ) mario =
   let
