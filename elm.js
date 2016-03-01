@@ -10545,16 +10545,49 @@ Elm.Jannine.make = function (_elm) {
       return $Basics.round(200 + 200 * $Basics.sin($Basics.degrees(t) / 10));
    },
    A3($Signal.foldp,F2(function (x,y) {    return x + y;}),0,$Time.fps(30)));
-   var reverseString = function (string) {    return A2($Html.div,_U.list([]),_U.list([$Html.text(A2($Basics._op["++"],">> ",$String.reverse(string)))]));};
+   var reverseString = function (string) {
+      return A2($Html.div,_U.list([]),_U.list([A2($Html.span,_U.list([]),_U.list([$Html.text(A2($Basics._op["++"],",",$String.reverse(string)))]))]));
+   };
    var actions = $Signal.mailbox("");
    var stringInput = A2($Html.input,
    _U.list([A3($Html$Events.on,"input",$Html$Events.targetValue,$Signal.message(actions.address))
            ,$Html$Attributes.rows(1)
            ,$Html$Attributes.type$("text")
+           ,$Html$Attributes.maxlength(14)
            ,$Html$Attributes.cols(50)]),
    _U.list([]));
-   var yogi = A2($Html.img,_U.list([$Html$Attributes.src("image/yogi.png")]),_U.list([]));
-   var view = function (string) {    return A2($Html.div,_U.list([]),_U.list([yogi,stringInput,reverseString(string)]));};
+   var Right = {ctor: "Right"};
+   var Left = {ctor: "Left"};
+   var yogi = function (input) {
+      var head = $String.toInt(A2($String.left,1,$String.reverse(input)));
+      var action = function () {
+         var _p0 = head;
+         if (_p0.ctor === "Ok") {
+               return _U.eq(A2($Basics._op["%"],_p0._0,2),0) ? Left : Right;
+            } else {
+               return Left;
+            }
+      }();
+      var image = function () {
+         var _p1 = action;
+         if (_p1.ctor === "Left") {
+               return "/out/kust/image/yogi-left.png";
+            } else {
+               return "/out/kust/image/yogi-right.png";
+            }
+      }();
+      return A2($Html.img,_U.list([$Html$Attributes.src(image)]),_U.list([]));
+   };
+   var view = function (string) {    return A2($Html.div,_U.list([]),_U.list([yogi(string),stringInput,reverseString(string)]));};
    var main = A2($Signal.map,view,actions.signal);
-   return _elm.Jannine.values = {_op: _op,yogi: yogi,actions: actions,stringInput: stringInput,reverseString: reverseString,view: view,size: size,main: main};
+   return _elm.Jannine.values = {_op: _op
+                                ,Left: Left
+                                ,Right: Right
+                                ,yogi: yogi
+                                ,actions: actions
+                                ,stringInput: stringInput
+                                ,reverseString: reverseString
+                                ,view: view
+                                ,size: size
+                                ,main: main};
 };

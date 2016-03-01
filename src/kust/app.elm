@@ -6,12 +6,44 @@ import Time exposing (fps)
 import Window
 import Html.Events exposing (on, targetValue)
 import String
+import Char
+import Maybe exposing (..)
 
 
-yogi =
-  img
-    [ src "image/yogi.png" ]
-    []
+type Action
+  = Left
+  | Right
+
+
+yogi : String -> Html
+yogi input =
+  let
+    head =
+      input |> String.reverse |> String.left 1 |> String.toInt
+
+    -- input |> String.reverse |> String.toList |> List.head
+    action =
+      case head of
+        Ok x ->
+          if x % 2 == 0 then
+            Left
+          else
+            Right
+
+        Err msg ->
+          Left
+
+    image =
+      case action of
+        Left ->
+          "/out/kust/image/yogi-left.png"
+
+        Right ->
+          "/out/kust/image/yogi-right.png"
+  in
+    img
+      [ src image ]
+      []
 
 
 actions : Signal.Mailbox String
@@ -25,6 +57,7 @@ stringInput =
     [ on "input" targetValue (Signal.message actions.address)
     , rows 1
     , type' "text"
+    , maxlength 14
     , cols 50
     ]
     []
@@ -32,14 +65,19 @@ stringInput =
 
 reverseString : String -> Html
 reverseString string =
-  div [] [ text <| ">> " ++ (String.reverse string) ]
+  div
+    []
+    [ span
+        []
+        [ text <| "," ++ (String.reverse string) ]
+    ]
 
 
 view : String -> Html
 view string =
   div
     []
-    [ yogi, stringInput, reverseString string ]
+    [ yogi string, stringInput, reverseString string ]
 
 
 size : Signal Int
