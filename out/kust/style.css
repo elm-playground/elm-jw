@@ -1,0 +1,20 @@
+@font-face {
+	font-family: dust;
+	src: url(font/kust.ttf);
+}
+textarea {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 10px;
+}
+
+.content {
+	font-family: dust;
+	font-size: 70px;
+	width: 500px;
+	margin-left: auto;
+	margin-right: auto;
+	background: WHITESMOKE;
+	padding:20px;
+}
