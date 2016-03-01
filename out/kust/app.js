@@ -10547,8 +10547,11 @@ Elm.Jannine.make = function (_elm) {
    A3($Signal.foldp,F2(function (x,y) {    return x + y;}),0,$Time.fps(30)));
    var reverseString = function (string) {    return A2($Html.div,_U.list([]),_U.list([$Html.text(A2($Basics._op["++"],">> ",$String.reverse(string)))]));};
    var actions = $Signal.mailbox("");
-   var stringInput = A2($Html.textarea,
-   _U.list([A3($Html$Events.on,"input",$Html$Events.targetValue,$Signal.message(actions.address)),$Html$Attributes.rows(10),$Html$Attributes.cols(50)]),
+   var stringInput = A2($Html.input,
+   _U.list([A3($Html$Events.on,"input",$Html$Events.targetValue,$Signal.message(actions.address))
+           ,$Html$Attributes.rows(1)
+           ,$Html$Attributes.type$("text")
+           ,$Html$Attributes.cols(50)]),
    _U.list([]));
    var yogi = A2($Html.img,_U.list([$Html$Attributes.src("image/yogi.png")]),_U.list([]));
    var view = function (string) {    return A2($Html.div,_U.list([]),_U.list([yogi,stringInput,reverseString(string)]));};

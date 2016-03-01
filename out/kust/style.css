@@ -9,6 +9,14 @@ textarea {
 	padding: 10px;
 }
 
+input {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	width: 80%;
+	padding: 10px;
+}
+
 .content {
 	font-family: dust;
 	font-size: 70px;

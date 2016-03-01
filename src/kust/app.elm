@@ -21,9 +21,10 @@ actions =
 
 stringInput : Html
 stringInput =
-  textarea
+  input
     [ on "input" targetValue (Signal.message actions.address)
-    , rows 10
+    , rows 1
+    , type' "text"
     , cols 50
     ]
     []
